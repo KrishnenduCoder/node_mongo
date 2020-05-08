@@ -1,0 +1,8 @@
+# ignore all logs
+*.log
+
+# .idea file
+.idea
+
+# Node Modules (dependency)
+node_modules
