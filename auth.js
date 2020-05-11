@@ -5,10 +5,11 @@ const app = express();
 const jwt = require('jsonwebtoken');
 const config = require('./config');
 // ROUTES THAT DO NOT NEED AUTH
-const openRotes = [
+const openRoutes = [
     '/',
     '/login',
     '/forgot_password',
+    '/about-us',
     '/faq'
 ];
 
@@ -16,7 +17,7 @@ const openRotes = [
 module.exports = function(req, res, next) {
     var token = req.body.token || req.param('token') || req.headers['x-access-token'];
     // CHECK IF URL IS OPEN-ROUTE
-    var position = openRotes.indexOf(req.url);
+    var position = openRoutes.indexOf(req.url);
 
     if (position >= 0)
     {
