@@ -1,3 +1,3 @@
 # node_mongo
 
-**This is a project to build REST API with NodeJs & MongoDB**
+**This is a dummy project to build REST API with NodeJs & MongoDB**

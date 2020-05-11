@@ -23,7 +23,15 @@ app.use(methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico')));
 
+// VIEW PATH & TEMPLATE ENGINE SET
+app.set('views', path.join(__dirname, '/api/views'));
+app.set('view engine', 'ejs');
+var index = require('./api/routes/index');
+app.use('/', index);
 
+// AUTHENTICATE REQUESTS
+var auth = require('./auth');
+app.use(auth);
 
 // RUN THE SERVICE
 app.listen(port, function (){
