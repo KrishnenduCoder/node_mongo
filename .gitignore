@@ -6,3 +6,6 @@
 
 # Node Modules (dependency)
 node_modules
+
+# Credentials
+creds.txt

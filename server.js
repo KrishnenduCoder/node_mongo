@@ -8,6 +8,7 @@ const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const favicon = require('serve-favicon');
 const path = require('path');
+const User = require('./api/models/userModel'); //created model loading here
 const port = process.env.PORT || config.port;
 
 // MONGO DATABASE CONNECTION
@@ -23,15 +24,19 @@ app.use(methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico')));
 
+// AUTHENTICATE REQUESTS
+var auth = require('./auth');
+app.use(auth);
+
 // VIEW PATH & TEMPLATE ENGINE SET
 app.set('views', path.join(__dirname, '/api/views'));
 app.set('view engine', 'ejs');
 var index = require('./api/routes/index');
 app.use('/', index);
 
-// AUTHENTICATE REQUESTS
-var auth = require('./auth');
-app.use(auth);
+// SET ROUTES
+const routes = require('./api/routes/routes');
+routes(app);
 
 // RUN THE SERVICE
 app.listen(port, function (){

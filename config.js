@@ -35,7 +35,9 @@ var config = {
     },
     serverRunMsg: 'Express server is running at port no : ',
     homeTitle: 'NodeJS Restful API',
-    token_salt_prefix: 'restnode'
+    hash_salt: null,
+    hash_progress: null,
 };
+
 module.exports = config;
 
