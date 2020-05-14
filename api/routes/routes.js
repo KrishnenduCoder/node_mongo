@@ -2,6 +2,7 @@
 module.exports = function(app){
     var user = require('../controllers/userController');
     var country = require('../controllers/countryController');
+    var covid = require('../controllers/covidController');
 
     // USER ROUTES
     app.route('/login')
@@ -10,5 +11,12 @@ module.exports = function(app){
     // COUNTRY ROUTES
     app.route('/countries')
         .get(country.countries);
-}
+
+    // COVID ROUTES
+    app.route('/global-summary')
+        .get(covid.globalSummary);
+
+    app.route('/india-summary')
+        .get(covid.indiaSummary);
+};
 
