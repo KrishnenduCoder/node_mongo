@@ -8,7 +8,9 @@ const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const favicon = require('serve-favicon');
 const path = require('path');
-const User = require('./api/models/userModel'); //created model loading here
+// MODEL LOADING
+const Country = require('./api/models/countryModel');
+const User = require('./api/models/userModel'); //user model
 const port = process.env.PORT || config.port;
 
 // MONGO DATABASE CONNECTION

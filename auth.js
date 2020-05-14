@@ -8,7 +8,7 @@ const config = require('./config');
 const openRoutes = [
     '/',
     '/login',
-    '/forgot_password',
+    '/forgot-password',
     '/about-us',
     '/faq'
 ];
