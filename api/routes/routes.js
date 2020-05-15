@@ -15,8 +15,9 @@ module.exports = function(app){
     // COVID ROUTES
     app.route('/global-summary')
         .get(covid.globalSummary);
-
     app.route('/india-summary')
         .get(covid.indiaSummary);
+    app.route('/cases-timeseries')
+        .get(covid.newCasesStats)
 };
 
