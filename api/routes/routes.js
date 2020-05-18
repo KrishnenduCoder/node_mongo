@@ -17,7 +17,15 @@ module.exports = function(app){
         .get(covid.globalSummary);
     app.route('/india-summary')
         .get(covid.indiaSummary);
-    app.route('/cases-timeseries')
-        .get(covid.newCasesStats)
+    app.route('/daily-cases-timeseries')
+        .get(covid.dailyCasesStats);
+    app.route('/total-cases-timeseries')
+        .get(covid.totalCaseStats);
+    app.route('/geolocation-summary')
+        .get(covid.geolocationSummary);
+    app.route('/most-affected-countries')
+        .get(covid.mostAffected);
+    app.route('/global-ratio')
+        .get(covid.globalRatio);
 };
 

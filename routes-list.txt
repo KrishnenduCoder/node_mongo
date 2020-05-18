@@ -6,7 +6,11 @@
 04. /sign-up
 05. /global-summary
 06. /india-summary
-07. /cases-timeseries
+07. /daily-cases-timeseries
+08. /total-cases-timeseries
+09. /geolocation-summary
+10. /most-affected-countries
+11. /global-ratio
 
 ------------------------------------------------------------------------------------------|
 ------------------------------------------------------------------------------------------|

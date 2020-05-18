@@ -37,6 +37,10 @@ var config = {
     homeTitle: 'NodeJS Restful API',
     hash_salt: null,
     hash_progress: null,
+    span_range: 30,
+    top5_limit: 5,
+    top10_limit: 10,
+    top15_limit: 15,
 };
 
 module.exports = config;

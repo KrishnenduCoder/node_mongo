@@ -25,6 +25,7 @@
     "node-mailer": "^0.1.1",
     "nodemailer-express-handlebars": "^2.0.0",
     "nodemailer-smtp-transport": "^2.7.4",
+    "nodemon": "^2.0.4",
     "path": "^0.12.7",
     "serve-favicon": "^2.5.0",
     "superagent": "^5.2.2",
