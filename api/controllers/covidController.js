@@ -1,8 +1,10 @@
 "use strict";
 
+const mongoose = require('mongoose');
+const Countries = mongoose.model('Countries');
 const config = require('../../config');
 const covidAPI = require('../../covidTracker');
-const api = require('../../api')
+const api = require('../../api');
 
 /**
  * GET PERCENTAGE RATE
@@ -154,6 +156,40 @@ exports.geolocationSummary = function(req, res){
 }
 
 /**
+ * ALL COUNTRIES TOTAL DATA
+ * @param req
+ * @param res
+ */
+exports.globalStat = function(req, res){
+    let url = covidAPI.globalSummary;
+    api.apiResponse(url, function(err, data){
+        if(data && data.hasOwnProperty('Countries')){
+            let countries = data.Countries;
+            let response = [];
+            countries.sort(function(a, b){
+                return b.TotalConfirmed-a.TotalConfirmed;
+            });
+
+            for(let i in countries){
+                let country = {
+                    country: countries[i].Country,
+                    iso2: countries[i].CountryCode,
+                    slug: countries[i].Slug,
+                    flag_image: config.__image_url + '/' + countries[i].CountryCode.toLowerCase() + '.png',
+                    confirmed: countries[i].TotalConfirmed,
+                    recovered: countries[i].TotalRecovered,
+                    deaths: countries[i].TotalDeaths,
+                }
+                response.push(country);
+            }
+            res.status(200).json({success: true, data: response});
+        }else{
+            res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
+}
+
+/**
  * TOP 10 MOST AFFECTED COUNTRY LIST
  * @param req
  * @param res
@@ -187,6 +223,45 @@ exports.mostAffected = function(req, res){
     });
 }
 
+/**
+ * TOP 5 LEAST AFFECTED COUNTRY LIST
+ * @param req
+ * @param res
+ */
+exports.leastAffected = function(req, res){
+    let url = covidAPI.globalSummary;
+    api.apiResponse(url, function(err, data){
+        if(data && data.hasOwnProperty('Countries')){
+            let countries = data.Countries;
+            let response = [];
+            countries.sort(function(a, b){
+                return a.TotalConfirmed-b.TotalConfirmed;
+            });
+
+            for(let i = 0; config.top5_limit > i; i++){
+                let country = {
+                    country: countries[i].Country,
+                    iso2: countries[i].CountryCode,
+                    slug: countries[i].Slug,
+                    flag_image: config.__image_url + '/' + countries[i].CountryCode.toLowerCase() + '.png',
+                    confirmed: countries[i].TotalConfirmed,
+                    recovered: countries[i].TotalRecovered,
+                    deaths: countries[i].TotalDeaths,
+                }
+                response.push(country);
+            }
+            res.status(200).json({success: true, data: response});
+        }else{
+            res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
+}
+
+/**
+ * GLOBAL RATIO
+ * @param req
+ * @param res
+ */
 exports.globalRatio = function(req, res){
     let url = covidAPI.globalSummary;
     api.apiResponse(url, function(err, data){
@@ -212,6 +287,36 @@ exports.globalRatio = function(req, res){
             res.status(200).json({success: true, data: response});
         }else{
             res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
+}
+
+/**
+ * COUNTRY CONFIRMED STATUS LIST FOR LAST 30 DAYS
+ * @param req
+ * @param res
+ */
+exports.countryData = function(req, res){
+    let slug = req.params.slug;
+    Countries.findOne({slug: slug}).exec(function(err, countryData){
+        if(countryData){
+            let url = covidAPI.countryStatusConfirm;
+            url = url.replace('[[COUNTRY]]', slug);
+            api.apiResponse(url, function(err, data){
+                if(data){
+                    let response = [];
+                    for(let i = config.span_range; i >= 1; i--){
+                        let key = (data.length - i);
+                        response.push({date: data[key].Date, case: data[key].Cases});
+                    }
+                    res.status(200).json({success: true, data: response});
+                }else{
+                    res.status(400).json({success: false, error: 'API response error'});
+                }
+            });
+        }
+        else{
+            res.status(400).json({success: false, error: 'invalid slug given'});
         }
     })
 }

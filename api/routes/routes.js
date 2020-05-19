@@ -27,5 +27,11 @@ module.exports = function(app){
         .get(covid.mostAffected);
     app.route('/global-ratio')
         .get(covid.globalRatio);
+    app.route('/least-affected-countries')
+        .get(covid.leastAffected);
+    app.route('/global-stat-list')
+        .get(covid.globalStat);
+    app.route('/country-data/:slug')
+        .get(covid.countryData);
 };
 

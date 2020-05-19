@@ -11,6 +11,9 @@
 09. /geolocation-summary
 10. /most-affected-countries
 11. /global-ratio
+12. /least-affected-countries
+13. /global-stat-list
+14. /country-data/:slug
 
 ------------------------------------------------------------------------------------------|
 ------------------------------------------------------------------------------------------|
