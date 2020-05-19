@@ -33,5 +33,7 @@ module.exports = function(app){
         .get(covid.globalStat);
     app.route('/country-data/:slug')
         .get(covid.countryData);
+    app.route('/india-statewise')
+        .get(covid.indiaStateWise);
 };
 

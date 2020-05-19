@@ -8,8 +8,8 @@ var config = {
     port: 3000,
     secret : 'Afv2ilj0iaT1@sB6r345-ipn0ilu9maI-Tn2n9eR',
     dev_mode : true,
-    __site_url: 'http://localhost:3000/',
-    __admin_url: 'http://localhost:4400/',
+    __site_url: 'http://localhost:3000',
+    __admin_url: 'http://localhost:4400',
     __image_url: '/images',
     email: {
         host: 'smtp.gmail.com',

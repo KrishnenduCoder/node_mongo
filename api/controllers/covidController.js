@@ -175,7 +175,7 @@ exports.globalStat = function(req, res){
                     country: countries[i].Country,
                     iso2: countries[i].CountryCode,
                     slug: countries[i].Slug,
-                    flag_image: config.__image_url + '/' + countries[i].CountryCode.toLowerCase() + '.png',
+                    flag_image: config.__site_url + config.__image_url + '/system/countries/' + countries[i].CountryCode.toLowerCase() + '.png',
                     confirmed: countries[i].TotalConfirmed,
                     recovered: countries[i].TotalRecovered,
                     deaths: countries[i].TotalDeaths,
@@ -209,7 +209,7 @@ exports.mostAffected = function(req, res){
                     country: countries[i].Country,
                     iso2: countries[i].CountryCode,
                     slug: countries[i].Slug,
-                    flag_image: config.__image_url + '/' + countries[i].CountryCode.toLowerCase() + '.png',
+                    flag_image: config.__site_url + config.__image_url + '/system/countries/' + countries[i].CountryCode.toLowerCase() + '.png',
                     confirmed: countries[i].TotalConfirmed,
                     recovered: countries[i].TotalRecovered,
                     deaths: countries[i].TotalDeaths,
@@ -243,7 +243,7 @@ exports.leastAffected = function(req, res){
                     country: countries[i].Country,
                     iso2: countries[i].CountryCode,
                     slug: countries[i].Slug,
-                    flag_image: config.__image_url + '/' + countries[i].CountryCode.toLowerCase() + '.png',
+                    flag_image: config.__site_url + config.__image_url + '/system/countries/' + countries[i].CountryCode.toLowerCase() + '.png',
                     confirmed: countries[i].TotalConfirmed,
                     recovered: countries[i].TotalRecovered,
                     deaths: countries[i].TotalDeaths,
@@ -278,7 +278,7 @@ exports.globalRatio = function(req, res){
                     country: countries[i].Country,
                     iso2: countries[i].CountryCode,
                     slug: countries[i].Slug,
-                    flag_image: config.__image_url + '/' + countries[i].CountryCode.toLowerCase() + '.png',
+                    flag_image: config.__site_url + config.__image_url + '/system/countries/' + countries[i].CountryCode.toLowerCase() + '.png',
                     confirmed: countries[i].TotalConfirmed,
                     ratio: getStatRate(totalGlobalConfirmed, countries[i].TotalConfirmed),
                 }
@@ -292,7 +292,7 @@ exports.globalRatio = function(req, res){
 }
 
 /**
- * COUNTRY CONFIRMED STATUS LIST FOR LAST 30 DAYS
+ * COUNTRY ALL STATUS LIST FOR LAST 30 DAYS
  * @param req
  * @param res
  */
@@ -300,15 +300,29 @@ exports.countryData = function(req, res){
     let slug = req.params.slug;
     Countries.findOne({slug: slug}).exec(function(err, countryData){
         if(countryData){
-            let url = covidAPI.countryStatusConfirm;
+            let url = covidAPI.countryStatusAll;
             url = url.replace('[[COUNTRY]]', slug);
             api.apiResponse(url, function(err, data){
                 if(data){
                     let response = [];
+                    let cases = [];
                     for(let i = config.span_range; i >= 1; i--){
                         let key = (data.length - i);
-                        response.push({date: data[key].Date, case: data[key].Cases});
+                        cases.push({
+                            date: data[key].Date,
+                            confirmed: data[key].Confirmed,
+                            recovered: data[key].Recovered,
+                            deaths: data[key].Deaths,
+                            active: data[key].Active
+                        });
                     }
+                    response.push({
+                        country: countryData.country,
+                        slug: countryData.slug,
+                        flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
+                        cases: cases
+                    })
+
                     res.status(200).json({success: true, data: response});
                 }else{
                     res.status(400).json({success: false, error: 'API response error'});
@@ -318,5 +332,18 @@ exports.countryData = function(req, res){
         else{
             res.status(400).json({success: false, error: 'invalid slug given'});
         }
+    });
+}
+
+/**
+ * INDIA STATE WISE DISTRIBUTION OF COVID-19
+ * @param req
+ * @param res
+ */
+exports.indiaStateWise = function(req, res){
+    let url = covidAPI.indiaStateWise;
+    api.apiResponse(url, function(err, data){
+        if(data) res.status(200).json({success: true, data: data});
+        else res.status(400).json({success: false, error: 'API response error'});
     })
 }
