@@ -14,13 +14,9 @@
 12. /least-affected-countries
 13. /global-stat-list
 14. /country-data/:slug
-15. /india-statewise
+15. /india-statedata
+16. /india-districtdata/:statecode
+17. /india-stetetimeline
 
 ------------------------------------------------------------------------------------------|
 ------------------------------------------------------------------------------------------|
-{
-    country: countryData.country,
-    slug: countryData.slug,
-    flag_image: config.__image_url + countryData.iso2.toLowerCase() + '.png',
-}
-

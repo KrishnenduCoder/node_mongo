@@ -5,6 +5,7 @@ const Countries = mongoose.model('Countries');
 const config = require('../../config');
 const covidAPI = require('../../covidTracker');
 const api = require('../../api');
+const lib = require('../../lib/app');
 
 /**
  * GET PERCENTAGE RATE
@@ -61,17 +62,17 @@ exports.indiaSummary = function(req, res){
             let testData = data.tested[data.tested.length - 1];
             let  responseData = {
                 total_confirmed: parseInt(statData.totalconfirmed),
+                currently_infected: parseInt(statData.totalconfirmed) - (parseInt(statData.totalrecovered) + parseInt(statData.totaldeceased)),
                 total_recovered: parseInt(statData.totalrecovered),
+                recovery_rate: getStatRate(statData.totalconfirmed, statData.totalrecovered),
                 total_deaths: parseInt(statData.totaldeceased),
+                death_rate: getStatRate(statData.totalconfirmed, statData.totaldeceased),
                 new_confirmed: parseInt(statData.dailyconfirmed),
                 new_recovered: parseInt(statData.dailyrecovered),
                 new_deaths: parseInt(statData.dailydeceased),
-                currently_infected: parseInt(statData.totalconfirmed) - (parseInt(statData.totalrecovered) + parseInt(statData.totaldeceased)),
                 total_tests: parseInt(testData.totalsamplestested),
                 test_data_source: testData.source,
-                date: statData.date,
-                recovery_rate: getStatRate(statData.totalconfirmed, statData.totalrecovered),
-                death_rate: getStatRate(statData.totalconfirmed, statData.totaldeceased)
+                date: statData.date.trim()
             }
 
             res.status(200).json({success: true, data: responseData});
@@ -321,7 +322,7 @@ exports.countryData = function(req, res){
                         slug: countryData.slug,
                         flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
                         cases: cases
-                    })
+                    });
 
                     res.status(200).json({success: true, data: response});
                 }else{
@@ -340,10 +341,111 @@ exports.countryData = function(req, res){
  * @param req
  * @param res
  */
-exports.indiaStateWise = function(req, res){
-    let url = covidAPI.indiaStateWise;
+exports.indiaStateData = function(req, res){
+    let url = covidAPI.indiaStateData;
     api.apiResponse(url, function(err, data){
-        if(data) res.status(200).json({success: true, data: data});
-        else res.status(400).json({success: false, error: 'API response error'});
-    })
+        if(data && data.hasOwnProperty('state_data')){
+            let response = [];
+            for(let i in data.state_data){
+                response.push({
+                    state: data.state_data[i].state,
+                    statecode: (lib.getStateCode(data.state_data[i].state)) ? lib.getStateCode(data.state_data[i].state) : 'unknown',
+                    confirmed: data.state_data[i].confirmed,
+                    active: data.state_data[i].active,
+                    active_rate: data.state_data[i].active_rate,
+                    deaths: data.state_data[i].deaths,
+                    death_rate: data.state_data[i].death_rate,
+                    recovered: data.state_data[i].recovered,
+                    recovered_rate: data.state_data[i].recovered_rate,
+                });
+            }
+
+            res.status(200).json({success: true, data: response});
+        }
+        else{
+            res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
+}
+
+/**
+ * INDIA DISTRICT WISE DISTRIBUTION BY STATE ISO2 CODE OF COVID-19
+ * @param req
+ * @param res
+ */
+exports.indiaStateWiseDistrictData = function(req, res){
+    let url = covidAPI.indiaStateWiseDistrictData;
+    api.apiResponse(url, function(err, stateData){
+        if(stateData){
+            let response = [];
+            for(let state in stateData){
+                if(stateData[state].statecode === req.params.statecode){
+                    let districtData = stateData[state].districtData;
+                    let districtArr = [];
+
+                    for(let district in districtData){
+                        let data = {
+                            district: district,
+                            confirmed: districtData[district].confirmed,
+                            active: districtData[district].active,
+                            recovered: districtData[district].recovered,
+                            deaths: districtData[district].deceased,
+                            notes: districtData[district].notes
+                        }
+                        districtArr.push(data);
+
+                        districtArr.sort(function(a, b){
+                            return b.active - a.active;
+                        });
+                    }
+
+                    response = {
+                        state: state,
+                        district_data: districtArr
+                    }
+                }
+            }
+
+            res.status(200).json({success: true, data: response});
+        }
+        else{
+            res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
+}
+
+/**
+ * INDIA COVID CASES TIME LINE STATE WISE
+ * @param req
+ * @param res
+ */
+exports.indiaStateTimeline = function(req, res){
+    let url = covidAPI.indiaStateTimeLine
+    api.apiResponse(url, function(err, timelineData){
+        if(timelineData){
+            let state = lib.getStateName(req.params.statecode);
+            let response = [];
+            let data = [];
+            let num = null;
+            for(let i in timelineData){
+                if(state === timelineData[i]['State UT'].toLowerCase()){
+                    for(let key in timelineData[i]) {
+                        if(key !== 'State UT'){
+                            num = {
+                                cases : timelineData[i][key],
+                                date: key
+                            }
+                            data.push(num);
+                        }
+                    }
+                }
+            }
+
+            response.push(data);
+            res.status(200).json({success: true, data: response});
+        }
+        else{
+            res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
 }

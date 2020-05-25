@@ -8,9 +8,14 @@ const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const favicon = require('serve-favicon');
 const path = require('path');
+
 // MODEL LOADING
-const Country = require('./api/models/countryModel');
+const Country = require('./api/models/countryModel'); //country model
 const User = require('./api/models/userModel'); //user model
+const Symptom = require('./api/models/symptomModel');
+const Prevention = require('./api/models/preventionModel');
+const MythBuster = require('./api/models/mythBusterModel');
+
 const port = process.env.PORT || config.port;
 
 // MONGO DATABASE CONNECTION

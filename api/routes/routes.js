@@ -33,7 +33,10 @@ module.exports = function(app){
         .get(covid.globalStat);
     app.route('/country-data/:slug')
         .get(covid.countryData);
-    app.route('/india-statewise')
-        .get(covid.indiaStateWise);
+    app.route('/india-state')
+        .get(covid.indiaStateData);
+    app.route('/india-districtdata/:statecode')
+        .get(covid.indiaStateWiseDistrictData);
+    app.route('/india-stetetimeline/:statecode')
+        .get(covid.indiaStateTimeline);
 };
-

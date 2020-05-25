@@ -3,14 +3,18 @@
 const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var PreventionSchema = new Schema({
+var MythBusterSchema = new Schema({
         title: {
             type: String,
-            required: 'please provide prevention title'
+            required: 'please provide myth-buster title'
         },
-        category: {
+        description: {
             type: String,
-            required: 'please provide prevention category'
+            required: 'please provide myth-buster description'
+        },
+        image: {
+            type: String,
+            required: 'please provide myth-buster myth-buster'
         },
         status: {
             type: [{
@@ -25,4 +29,4 @@ var PreventionSchema = new Schema({
         typecast: true
     });
 
-module.exports = mongoose.model('Preventions', PreventionSchema);
+module.exports = mongoose.model('MythBuster', MythBusterSchema);
