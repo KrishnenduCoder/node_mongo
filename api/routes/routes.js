@@ -3,6 +3,7 @@ module.exports = function(app){
     var user = require('../controllers/userController');
     var country = require('../controllers/countryController');
     var covid = require('../controllers/covidController');
+    var prevention = require('../controllers/preventionController');
 
     // USER ROUTES
     app.route('/login')
@@ -11,6 +12,10 @@ module.exports = function(app){
     // COUNTRY ROUTES
     app.route('/countries')
         .get(country.countries);
+
+    // PREVENTION ROUTES
+    app.route('/preventions')
+        .get(prevention.preventionLists)
 
     // COVID ROUTES
     app.route('/global-summary')

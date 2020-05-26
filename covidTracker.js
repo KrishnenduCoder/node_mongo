@@ -18,7 +18,7 @@ var covid = {
     indiaStateTimeLine: "https://covid-india-cases.herokuapp.com/statetimeline/",
     indiaHelpLine: "https://covid-19india-api.herokuapp.com/helpline_numbers",
     // IP DETAILS
-    ipDetails: "http://ip-api.com/json/[[IP_ADDRESS]]",
+    ipDetails: "http://ip-api.com/json/[[IP_ADDRESS]]?fields=61439",
 }
 
 module.exports = covid;

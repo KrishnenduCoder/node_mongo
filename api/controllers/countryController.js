@@ -12,7 +12,7 @@ const config = require('../../config');
 exports.countries = function (req, res){
     Countries.find()
         .sort({"iso2" : 1})
-        .exec(function (err, countryList){
+        .exec(function(err, countryList){
         if(countryList){
             res.status(200).json({success: true, data: countryList});
         }

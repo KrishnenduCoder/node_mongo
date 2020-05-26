@@ -5,7 +5,7 @@
  */
 
 var config = {
-    port: 3000,
+    port: 8080,
     secret : 'Afv2ilj0iaT1@sB6r345-ipn0ilu9maI-Tn2n9eR',
     dev_mode : true,
     __site_url: 'http://localhost:3000',

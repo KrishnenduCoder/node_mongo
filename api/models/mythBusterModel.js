@@ -14,7 +14,7 @@ var MythBusterSchema = new Schema({
         },
         image: {
             type: String,
-            required: 'please provide myth-buster myth-buster'
+            required: 'please provide myth-buster image url'
         },
         status: {
             type: [{
