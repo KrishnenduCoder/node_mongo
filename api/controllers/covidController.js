@@ -573,6 +573,11 @@ exports.globalTimeSeries = function(req, res){
     });
 }
 
+/**
+ *
+ * @param req
+ * @param res
+ */
 exports.globalTotalTimeSeries = function(req, res){
     let dates = getDateRange(config.span_range);
     let date1 = dates.dateFrom+'T00:00:00Z';
