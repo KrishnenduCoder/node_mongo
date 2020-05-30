@@ -574,7 +574,7 @@ exports.globalTimeSeries = function(req, res){
 }
 
 /**
- *
+ * GLOBAL TOTAL TIME SERIES
  * @param req
  * @param res
  */
