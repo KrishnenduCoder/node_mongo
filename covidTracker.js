@@ -9,6 +9,7 @@ var covid = {
     globalSummary: "https://api.covid19api.com/summary",
     countryStatusAll: "https://api.covid19api.com/total/country/[[COUNTRY]]",
     countryStatusTotal: "https://api.covid19api.com/country/[[COUNTRY]]?from=[[DATE1]]&to=[[DATE2]]",
+    worldStatusTotal: 'https://api.covid19api.com/world?from=[[DATE1]]&to=[[DATE2]]',
     worldTotal: "https://api.covid19api.com/world/total",
     countryStatus: "https://covid19-api.org/api/status",
     // INDIA DATA

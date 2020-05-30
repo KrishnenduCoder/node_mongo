@@ -23,6 +23,92 @@ function getStatRate(total, num){
 }
 
 /**
+ * GET DATE RANGE FROM CURRENT DATE TO LAST DATE WITH GIVEN RANGE
+ * @param range
+ * @returns {{dateTo: string, dateFrom: string}}
+ */
+function getDateRange(range)
+{
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    var dateTo = yyyy + '-' + mm + '-' + dd;
+
+    var lastDateTimeStamp = new Date().setDate(today.getDate()-range);
+    var lastDate = new Date(lastDateTimeStamp);
+    dd = String(lastDate.getDate()).padStart(2, '0');
+    mm = String(lastDate.getMonth() + 1).padStart(2, '0'); //January is 0!
+    yyyy = lastDate.getFullYear();
+    var dateFrom = yyyy + '-' + mm + '-' + dd;
+
+    return {
+        dateTo: dateTo,
+        dateFrom: dateFrom
+    };
+}
+
+/**
+ * GET ALL DATES BETWEEN TWO GIVEN DATES
+ * @param startDate
+ * @param endDate
+ * @returns {[]}
+ */
+function getDates(startDate, endDate) {
+    var dates = [],
+        currentDate = startDate,
+        addDays = function(days) {
+            var date = new Date(this.valueOf());
+            date.setDate(date.getDate() + days);
+            return date;
+        };
+    while (currentDate <= endDate) {
+        dates.push(currentDate);
+        currentDate = addDays.call(currentDate, 1);
+    }
+    return dates;
+}
+
+/**
+ * FORMAT DATES
+ * @param date
+ * @param type
+ * @returns {null}
+ */
+function formatDate(date, type = 1){
+    let dd = String(date.getDate()).padStart(2, '0');
+    let yyyy = date.getFullYear();
+    let mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+    let formattedDate = null;
+
+    let months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+    ];
+
+    switch(type){
+        case 1:
+            formattedDate = yyyy + '-' + mm + '-' + dd;
+            break;
+        case 2:
+            formattedDate = dd +' '+months[parseInt(mm)-1];
+            break;
+    }
+
+    return formattedDate;
+}
+
+/**
  * GET GLOBAL COVID-19 SUMMARY BY API
  * @param req
  * @param res
@@ -84,7 +170,7 @@ exports.indiaSummary = function(req, res){
 }
 
 /**
- * GET DAILY INFECTION & DEATH (BOTH & SEPARATE) NUMBERS
+ * GET DAILY INFECTION & DEATH (BOTH & SEPARATE) NUMBERS FOR INDIA
  * @param req
  * @param res
  */
@@ -442,6 +528,74 @@ exports.indiaStateTimeline = function(req, res){
             }
 
             response.push(data);
+            res.status(200).json({success: true, data: response});
+        }
+        else{
+            res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
+}
+
+/**
+ * GLOBAL TIME SERIES INFECTED & DEATHS (BOTH & SEPARATE)
+ * @param req
+ * @param res
+ */
+exports.globalTimeSeries = function(req, res){
+    let dates = getDateRange(config.span_range);
+    let date1 = dates.dateFrom+'T00:00:00Z';
+    let date2 = dates.dateTo+'T00:00:00Z';
+
+    let url = covidAPI.worldStatusTotal;
+    url = url.replace('[[DATE1]]', date1);
+    url = url.replace('[[DATE2]]', date2);
+
+    let datesArr = getDates(new Date(date1), new Date(date2));
+
+    api.apiResponse(url, function(err, seriesData){
+        if(seriesData){
+            let response = [];
+            let data = [];
+            let bothArr = [];
+            let infectedArr = [];
+            let deathsArr = [];
+            for(let key in seriesData){
+                bothArr.push({date: formatDate(datesArr[key], 2), infected: seriesData[key].NewConfirmed, deaths: seriesData[key].NewDeaths});
+                infectedArr.push({date: formatDate(datesArr[key], 2), infected: seriesData[key].NewConfirmed});
+                deathsArr.push({date: formatDate(datesArr[key], 2), deaths: seriesData[key].NewDeaths});
+            }
+            response = {both: bothArr, infected: infectedArr, deaths: deathsArr};
+            res.status(200).json({success: true, data: response});
+        }
+        else{
+            res.status(400).json({success: false, error: 'API response error'});
+        }
+    });
+}
+
+exports.globalTotalTimeSeries = function(req, res){
+    let dates = getDateRange(config.span_range);
+    let date1 = dates.dateFrom+'T00:00:00Z';
+    let date2 = dates.dateTo+'T00:00:00Z';
+
+    let url = covidAPI.worldStatusTotal;
+    url = url.replace('[[DATE1]]', date1);
+    url = url.replace('[[DATE2]]', date2);
+
+    let datesArr = getDates(new Date(date1), new Date(date2));
+
+    api.apiResponse(url, function(err, data){
+        if(data){
+            let response = [];
+            for(let key in data){
+                let arr = {
+                    date: formatDate(datesArr[key], 2),
+                    active: parseInt(data[key].TotalConfirmed) - (parseInt(data[key].TotalRecovered) + parseInt(data[key].TotalDeaths)),
+                    recovered: data[key].TotalRecovered,
+                    death: data[key].TotalDeaths
+                }
+                response.push(arr);
+            }
             res.status(200).json({success: true, data: response});
         }
         else{
