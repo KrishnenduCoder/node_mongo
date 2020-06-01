@@ -114,17 +114,22 @@ function formatDate(date, type = 1){
  * @param res
  */
 exports.globalSummary = function(req, res){
-    var url = covidAPI.globalSummary;
+    var url = covidAPI.worldTotal;
     api.apiResponse(url, function( err, data){
         if(data){
+          /* RATES */
+          let recoveryRate = getStatRate(data.results[0].total_cases, data.results[0].total_recovered);
+          let deathRate = getStatRate(data.results[0].total_cases, data.results[0].total_deaths);
+
             let  responseData = {
-                total_confirmed: data.Global.TotalConfirmed,
-                total_recovered: data.Global.TotalRecovered,
-                total_deaths: data.Global.TotalDeaths,
-                new_confirmed: data.Global.NewConfirmed,
-                new_recovered: data.Global.NewRecovered,
-                recovery_rate: getStatRate(data.Global.TotalConfirmed, data.Global.TotalRecovered),
-                death_rate: getStatRate(data.Global.TotalConfirmed, data.Global.TotalDeaths)
+                total_confirmed: data.results[0].total_cases,
+                total_active: data.results[0].total_active_cases,
+                total_recovered: data.results[0].total_recovered,
+                total_deaths: data.results[0].total_deaths,
+                active_cases_rate: 100 - (parseFloat(recoveryRate) + parseFloat(deathRate)),
+                recovery_rate: recoveryRate,
+                death_rate: deathRate,
+                source: data.results[0].source.url
             }
 
             res.status(200).json({success: true, data: responseData});
@@ -232,8 +237,15 @@ exports.geolocationSummary = function(req, res){
             let countries = data.Countries;
             let response = [];
             let index;
+
+            response.push(['ISO2', 'COUNTRY', 'CONFIRMED CASES']); // COLUMN HEAD FOR GEO-CHART
+
             for(index in countries){
-                response.push({country: countries[index].Country, iso2: countries[index].CountryCode, slug: countries[index].Slug, confirmed: countries[index].TotalConfirmed});
+                response.push([
+                  countries[index].CountryCode,
+                  countries[index].Country,
+                  countries[index].TotalConfirmed
+                ]);
             }
             res.status(200).json({success: true, data: response});
         }else{
