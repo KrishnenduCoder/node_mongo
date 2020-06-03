@@ -117,16 +117,17 @@ exports.globalSummary = function(req, res){
     var url = covidAPI.worldTotal;
     api.apiResponse(url, function( err, data){
         if(data){
-          /* RATES */
+          /* PERCENTAGE RATES */
           let recoveryRate = getStatRate(data.results[0].total_cases, data.results[0].total_recovered);
           let deathRate = getStatRate(data.results[0].total_cases, data.results[0].total_deaths);
+          let activeCaseRate = getStatRate(data.results[0].total_cases, data.results[0].total_active_cases);
 
             let  responseData = {
                 total_confirmed: data.results[0].total_cases,
                 total_active: data.results[0].total_active_cases,
                 total_recovered: data.results[0].total_recovered,
                 total_deaths: data.results[0].total_deaths,
-                active_cases_rate: 100 - (parseFloat(recoveryRate) + parseFloat(deathRate)),
+                active_cases_rate: activeCaseRate,
                 recovery_rate: recoveryRate,
                 death_rate: deathRate,
                 source: data.results[0].source.url
@@ -153,14 +154,14 @@ exports.indiaSummary = function(req, res){
             let testData = data.tested[data.tested.length - 1];
             let  responseData = {
                 total_confirmed: parseInt(statData.totalconfirmed),
-                currently_infected: parseInt(statData.totalconfirmed) - (parseInt(statData.totalrecovered) + parseInt(statData.totaldeceased)),
                 total_recovered: parseInt(statData.totalrecovered),
-                recovery_rate: getStatRate(statData.totalconfirmed, statData.totalrecovered),
                 total_deaths: parseInt(statData.totaldeceased),
-                death_rate: getStatRate(statData.totalconfirmed, statData.totaldeceased),
+                currently_infected: parseInt(statData.totalconfirmed) - (parseInt(statData.totalrecovered) + parseInt(statData.totaldeceased)),
                 new_confirmed: parseInt(statData.dailyconfirmed),
                 new_recovered: parseInt(statData.dailyrecovered),
                 new_deaths: parseInt(statData.dailydeceased),
+                recovery_rate: getStatRate(statData.totalconfirmed, statData.totalrecovered),
+                death_rate: getStatRate(statData.totalconfirmed, statData.totaldeceased),
                 total_tests: parseInt(testData.totalsamplestested),
                 test_data_source: testData.source,
                 date: statData.date.trim()
