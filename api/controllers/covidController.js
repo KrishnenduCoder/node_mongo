@@ -117,10 +117,10 @@ exports.globalSummary = function(req, res){
     var url = covidAPI.worldTotal;
     api.apiResponse(url, function( err, data){
         if(data){
-          /* PERCENTAGE RATES */
-          let recoveryRate = getStatRate(data.results[0].total_cases, data.results[0].total_recovered);
-          let deathRate = getStatRate(data.results[0].total_cases, data.results[0].total_deaths);
-          let activeCaseRate = getStatRate(data.results[0].total_cases, data.results[0].total_active_cases);
+            /* PERCENTAGE RATES */
+            let recoveryRate = getStatRate(data.results[0].total_cases, data.results[0].total_recovered);
+            let deathRate = getStatRate(data.results[0].total_cases, data.results[0].total_deaths);
+            let activeCaseRate = getStatRate(data.results[0].total_cases, data.results[0].total_active_cases);
 
             let  responseData = {
                 total_confirmed: data.results[0].total_cases,
@@ -243,9 +243,9 @@ exports.geolocationSummary = function(req, res){
 
             for(index in countries){
                 response.push([
-                  countries[index].CountryCode,
-                  countries[index].Country,
-                  countries[index].TotalConfirmed
+                    countries[index].CountryCode,
+                    countries[index].Country,
+                    countries[index].TotalConfirmed
                 ]);
             }
             res.status(200).json({success: true, data: response});
@@ -304,7 +304,7 @@ exports.mostAffected = function(req, res){
                 return b.TotalConfirmed-a.TotalConfirmed;
             });
 
-            for(let i = 0; config.top10_limit > i; i++){
+            for(let i = 0; config.top7_limit > i; i++){
                 let country = {
                     country: countries[i].Country,
                     iso2: countries[i].CountryCode,
@@ -373,7 +373,7 @@ exports.globalRatio = function(req, res){
                 return b.TotalConfirmed-a.TotalConfirmed;
             });
 
-            for(let i = 0; config.top5_limit > i; i++){
+            for(let i = 0; config.top7_limit > i; i++){
                 let country = {
                     country: countries[i].Country,
                     iso2: countries[i].CountryCode,
@@ -430,6 +430,54 @@ exports.countryData = function(req, res){
             });
         }
         else{
+            res.status(400).json({success: false, error: 'invalid slug given'});
+        }
+    });
+}
+
+/**
+ * COUNTRY SUMMARY
+ * @param req
+ * @param res
+ */
+exports.countrySummary = function(req, res){
+    let slug = req.params.slug;
+    Countries.findOne({slug: slug}).exec(function(err, countryData){
+        if(countryData){
+            let iso = countryData.iso2;
+            let url = covidAPI.countryStatus;
+            api.apiResponse(url, function(err, countryArr){
+                if(countryArr){
+
+                    let response = [];
+
+                    for(let key in countryArr){
+                        if(countryArr[key].country === iso.toUpperCase()){
+                             response = {
+                                country: countryData.country,
+                                iso2: iso,
+                                flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
+                                slug: countryData.slug,
+                                infected: countryArr[key].cases,
+                                active: countryArr[key].cases - (parseInt(countryArr[key].recovered) + parseInt(countryArr[key].deaths)),
+                                recovered: countryArr[key].recovered,
+                                deaths: countryArr[key].deaths,
+                            }
+                            break;
+                        }
+                    }
+
+                    if(Object.keys(response).length > 0){
+                        res.status(200).json({success: true, data: response});
+                    }else{
+                        res.status(400).json({success: false, error: 'data not found'});
+                    }
+
+                }else{
+                    res.status(400).json({success: false, error: 'API response error'});
+                }
+            });
+        }else{
             res.status(400).json({success: false, error: 'invalid slug given'});
         }
     });
@@ -569,15 +617,17 @@ exports.globalTimeSeries = function(req, res){
         if(seriesData){
             let response = [];
             let data = [];
-            let bothArr = [];
+            let labeslArr = [];
             let infectedArr = [];
             let deathsArr = [];
+
             for(let key in seriesData){
-                bothArr.push({date: formatDate(datesArr[key], 2), infected: seriesData[key].NewConfirmed, deaths: seriesData[key].NewDeaths});
-                infectedArr.push({date: formatDate(datesArr[key], 2), infected: seriesData[key].NewConfirmed});
-                deathsArr.push({date: formatDate(datesArr[key], 2), deaths: seriesData[key].NewDeaths});
+                labeslArr.push(formatDate(datesArr[key], 2));
+                deathsArr.push(seriesData[key].NewDeaths);
+                infectedArr.push(seriesData[key].NewConfirmed);
             }
-            response = {both: bothArr, infected: infectedArr, deaths: deathsArr};
+            response = {labels: labeslArr, infected: infectedArr, deaths: deathsArr};
+
             res.status(200).json({success: true, data: response});
         }
         else{
@@ -605,15 +655,25 @@ exports.globalTotalTimeSeries = function(req, res){
     api.apiResponse(url, function(err, data){
         if(data){
             let response = [];
+            let labeslArr = [];
+            let recoveredArr = [];
+            let activeCaseArr = [];
+            let deathsArr = [];
+
             for(let key in data){
-                let arr = {
-                    date: formatDate(datesArr[key], 2),
-                    active: parseInt(data[key].TotalConfirmed) - (parseInt(data[key].TotalRecovered) + parseInt(data[key].TotalDeaths)),
-                    recovered: data[key].TotalRecovered,
-                    death: data[key].TotalDeaths
-                }
-                response.push(arr);
+                labeslArr.push(formatDate(datesArr[key], 2));
+                activeCaseArr.push(parseInt(data[key].TotalConfirmed) - (parseInt(data[key].TotalRecovered) + parseInt(data[key].TotalDeaths)));
+                recoveredArr.push(data[key].TotalRecovered);
+                deathsArr.push(data[key].TotalDeaths);
             }
+
+            response.push({
+                labels: labeslArr,
+                active: activeCaseArr,
+                recovered: recoveredArr,
+                deaths: deathsArr
+            });
+
             res.status(200).json({success: true, data: response});
         }
         else{

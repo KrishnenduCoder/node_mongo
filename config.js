@@ -39,10 +39,10 @@ var config = {
     hash_progress: null,
     span_range: 30,
     top5_limit: 5,
+    top7_limit: 7,
     top10_limit: 10,
     top15_limit: 15,
     __ip_api_url: 'http://ip-api.com/json/',
 };
 
 module.exports = config;
-

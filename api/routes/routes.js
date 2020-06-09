@@ -20,10 +20,10 @@ module.exports = function(app){
     // COVID ROUTES
     app.route('/global-summary')
         .get(covid.globalSummary);
-    
+
     app.route('/india-summary')
         .get(covid.indiaSummary);
-    
+
     app.route('/global-timeseries')
         .get(covid.globalTimeSeries);
 
@@ -32,34 +32,37 @@ module.exports = function(app){
 
     app.route('/daily-cases-timeseries')
         .get(covid.dailyCasesStats);
-    
+
     app.route('/total-cases-timeseries')
         .get(covid.totalCaseStats);
-    
+
     app.route('/geolocation-summary')
         .get(covid.geolocationSummary);
-    
+
     app.route('/most-affected-countries')
         .get(covid.mostAffected);
-    
+
     app.route('/global-ratio')
         .get(covid.globalRatio);
-    
+
     app.route('/least-affected-countries')
         .get(covid.leastAffected);
-    
+
     app.route('/global-stat-list')
         .get(covid.globalStat);
-    
+
     app.route('/country-data/:slug')
         .get(covid.countryData);
-    
+
+    app.route('/country-summary/:slug')
+        .get(covid.countrySummary);
+
     app.route('/india-state')
         .get(covid.indiaStateData);
-    
+
     app.route('/india-districtdata/:statecode')
         .get(covid.indiaStateWiseDistrictData);
-    
+
     app.route('/india-stetetimeline/:statecode')
         .get(covid.indiaStateTimeline);
 };
