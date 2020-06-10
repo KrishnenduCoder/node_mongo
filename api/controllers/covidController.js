@@ -391,12 +391,29 @@ exports.globalRatio = function(req, res){
     });
 }
 
+exports.countryData = function(req, res){
+  let slug = req.params.slug;
+  Countries.findOne({slug: slug}).exec(function(err, countryData){
+    if(countryData){
+      let response = {
+        name: countryData.country,
+        iso2: countryData.iso2,
+        slug: slug,
+        flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
+      }
+      res.status(200).json({success: true, data: response});
+    }else{
+      res.status(400).json({success: false, error: 'invalid slug given'});
+    }
+  })
+}
+
 /**
  * COUNTRY ALL STATUS LIST FOR LAST 30 DAYS
  * @param req
  * @param res
  */
-exports.countryData = function(req, res){
+exports.countryTimeLineData = function(req, res){
     let slug = req.params.slug;
     Countries.findOne({slug: slug}).exec(function(err, countryData){
         if(countryData){
@@ -405,10 +422,10 @@ exports.countryData = function(req, res){
             api.apiResponse(url, function(err, data){
                 if(data){
                     let response = [];
-                    let cases = [];
+
                     for(let i = config.span_range; i >= 1; i--){
                         let key = (data.length - i);
-                        cases.push({
+                        response.push({
                             date: data[key].Date,
                             confirmed: data[key].Confirmed,
                             recovered: data[key].Recovered,
@@ -416,12 +433,6 @@ exports.countryData = function(req, res){
                             active: data[key].Active
                         });
                     }
-                    response.push({
-                        country: countryData.country,
-                        slug: countryData.slug,
-                        flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
-                        cases: cases
-                    });
 
                     res.status(200).json({success: true, data: response});
                 }else{
@@ -458,10 +469,13 @@ exports.countrySummary = function(req, res){
                                 iso2: iso,
                                 flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
                                 slug: countryData.slug,
+                                global_rank: parseInt(key)+1,
                                 infected: countryArr[key].cases,
                                 active: countryArr[key].cases - (parseInt(countryArr[key].recovered) + parseInt(countryArr[key].deaths)),
                                 recovered: countryArr[key].recovered,
+                                recovery_rate: getStatRate(countryArr[key].cases, countryArr[key].recovered),
                                 deaths: countryArr[key].deaths,
+                                death_rate: getStatRate(countryArr[key].cases, countryArr[key].deaths)
                             }
                             break;
                         }

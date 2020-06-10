@@ -54,6 +54,9 @@ module.exports = function(app){
     app.route('/country-data/:slug')
         .get(covid.countryData);
 
+    app.route('/country-timeline-data/:slug')
+        .get(covid.countryTimeLineData);
+
     app.route('/country-summary/:slug')
         .get(covid.countrySummary);
 
