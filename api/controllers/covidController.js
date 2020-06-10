@@ -109,6 +109,26 @@ function formatDate(date, type = 1){
 }
 
 /**
+* ADD SUFFIX AFTER A NUMBER
+* @param i
+* @returns String
+*/
+function ordinalSuffix(i){
+    var j = i % 10,
+        k = i % 100;
+    if (j == 1 && k != 11) {
+        return i + "st";
+    }
+    if (j == 2 && k != 12) {
+        return i + "nd";
+    }
+    if (j == 3 && k != 13) {
+        return i + "rd";
+    }
+    return i + "th";
+}
+
+/**
  * GET GLOBAL COVID-19 SUMMARY BY API
  * @param req
  * @param res
@@ -396,7 +416,7 @@ exports.countryData = function(req, res){
   Countries.findOne({slug: slug}).exec(function(err, countryData){
     if(countryData){
       let response = {
-        name: countryData.country,
+        country: countryData.country,
         iso2: countryData.iso2,
         slug: slug,
         flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
@@ -422,16 +442,25 @@ exports.countryTimeLineData = function(req, res){
             api.apiResponse(url, function(err, data){
                 if(data){
                     let response = [];
+                    let labelsArr = [];
+                    let confirmedArr = [];
+                    let recoveredArr = [];
+                    let deathsArr = [];
 
                     for(let i = config.span_range; i >= 1; i--){
                         let key = (data.length - i);
-                        response.push({
-                            date: data[key].Date,
-                            confirmed: data[key].Confirmed,
-                            recovered: data[key].Recovered,
-                            deaths: data[key].Deaths,
-                            active: data[key].Active
-                        });
+                        let date = new Date(data[key].Date);
+                        labelsArr.push(formatDate(date, 2));
+                        confirmedArr.push(data[key].Confirmed);
+                        recoveredArr.push(data[key].Recovered);
+                        deathsArr.push(data[key].Deaths);
+                    }
+
+                    response = {
+                      labels: labelsArr,
+                      infected: confirmedArr,
+                      recovered: recoveredArr,
+                      deaths: deathsArr
                     }
 
                     res.status(200).json({success: true, data: response});
@@ -469,7 +498,7 @@ exports.countrySummary = function(req, res){
                                 iso2: iso,
                                 flag_image: config.__site_url + config.__image_url + '/system/countries/' + countryData.iso2.toLowerCase() + '.png',
                                 slug: countryData.slug,
-                                global_rank: parseInt(key)+1,
+                                global_rank: ordinalSuffix(parseInt(key)+1),
                                 infected: countryArr[key].cases,
                                 active: countryArr[key].cases - (parseInt(countryArr[key].recovered) + parseInt(countryArr[key].deaths)),
                                 recovered: countryArr[key].recovered,
